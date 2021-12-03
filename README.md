@@ -4,14 +4,32 @@ This is my first ever public PCB build. Version 0.1 is ordered from JLCPCB and s
 
 Since this is quite early in the development of this project, the PCB can contain issues so be aware! In the future I'd love to have more control over the LEDs. Currently the tree only has 5 "zones" as seen in the preview of the software. I'd love to support individual adressing of the LEDs to create even better animations.
 
-As I am no electronic engineer the PCB does look ugly and can contain some non-standard things. Also after placing the order with JLCPCB, I have discovered that the silkscreen of the RGB LEDs are cut off, woops my mistake.
+As I am no electronic engineer the PCB does look ugly and can contain some non-standard things. Also after placing the order with JLCPCB, I have discovered that the silkscreen of the RGB LEDs are cut off, woops my mistake. Also I could not figure out how to get rid of the ESP32 Silkscreen.
 
 - Create animations with up to 256 frames! Thats a 128 Seconds long animation!
 
 # PCB Preview
 
-![bottom](https://user-images.githubusercontent.com/20743379/144643475-46dab2a0-32f6-418d-850d-f22997feaaa3.png)
+<table>
+  <tr>
+    <td>
+      <img src="https://user-images.githubusercontent.com/20743379/144643475-46dab2a0-32f6-418d-850d-f22997feaaa3.png" style="float:left;" />
+      <br />
+      Bottom View
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/20743379/144644482-c9d8dd02-7b3c-48c4-b41e-87ac5af607c9.png" style="float:right;"/>
+      <br />
+      Top View
+    </td>
+  </tr>
+</table>
+
 
 # Preview
 
 ![Preview](https://user-images.githubusercontent.com/20743379/144642977-bbb2b022-0c0c-4441-a916-1a5c6091e8bc.png)
+
+# Issues with the current board
+
+- I have not checked for the pinout of the ESP32... So I assume there are some reserved GPIO pins connected :/.
