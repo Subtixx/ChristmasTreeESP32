@@ -6,6 +6,8 @@ Since this is quite early in the development of this project, the PCB can contai
 
 As I am no electronic engineer the PCB does look ugly and can contain some non-standard things. Also after placing the order with JLCPCB, I have discovered that the silkscreen of the RGB LEDs are cut off, woops my mistake. Also I could not figure out how to get rid of the ESP32 Silkscreen.
 
+The whole board was designed using EasyEDA.
+
 - Create animations with up to 256 frames! Thats a 128 Seconds long animation!
 
 # PCB Preview
