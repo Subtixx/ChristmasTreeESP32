@@ -4,6 +4,8 @@ This is my first ever public PCB build. Version 0.1 is ordered from JLCPCB and s
 
 Since this is quite early in the development of this project, the PCB can contain issues so be aware! In the future I'd love to have more control over the LEDs. Currently the tree only has 5 "zones" as seen in the preview of the software. I'd love to support individual adressing of the LEDs to create even better animations.
 
+As I am no electronic engineer the PCB does look ugly and can contain some non-standard things. Also after placing the order with JLCPCB, I have discovered that the silkscreen of the RGB LEDs are cut off, woops my mistake.
+
 - Create animations with up to 256 frames! Thats a 128 Seconds long animation!
 
 # PCB Preview
