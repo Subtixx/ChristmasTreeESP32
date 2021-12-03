@@ -1,5 +1,6 @@
 # ChristmasTreeESP32
-WIP
+
+- Create animations with up to 256 frames! Thats a 128 Seconds long animation!
 
 # Preview
 
