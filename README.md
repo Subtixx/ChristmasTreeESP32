@@ -35,3 +35,24 @@ The whole board was designed using EasyEDA.
 # Issues with the current board
 
 - I have not checked for the pinout of the ESP32... So I assume there are some reserved GPIO pins connected :/.
+
+# Technical explanation
+
+The JQuery script sents a POST request with all of the frames of animation. The animation frames look like this
+```json
+[
+    [1, 0, 0, 0, 0],
+    [2, 0, 0, 0, 0],
+    [3, 0, 0, 0, 0],
+    [4, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0]
+]
+```
+
+It's a 2D Array with the first dimension being the frame of animation and the second being the color of a "band" (I call the different LED groups bands).
+So in this example its a 5 frame animation (2.5 seconds long as one frame takes roughly 500 ms). With the following values
+1. Red
+2. Green
+3. Blue
+4. Yellow
+5. Off
