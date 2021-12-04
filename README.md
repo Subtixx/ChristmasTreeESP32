@@ -10,6 +10,11 @@ The whole board was designed using EasyEDA.
 
 - Create animations with up to 256 frames! Thats a 128 Seconds long animation! (This still needs testing if all of this fits in the ESP32 code)
 
+# Why?
+
+There are a number of soldering kits out there for a christmas tree as a PCB. However all of them are flawed in my opinion, they're missing an ESP32! (And are annoying since they're not calming at all!).
+This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
+
 # WiFi Setup
 
 1. Enter the SSID of your Wifi in [WiFiCredentials.h:1](https://github.com/Subtixx/ChristmasTreeESP32/blob/6ed7a89fb9c6c5deb8025a748663b42830a94d5e/esp32_code/WiFiCredentials.h#L1)
