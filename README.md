@@ -8,7 +8,12 @@ As I am no electronic engineer the PCB does look ugly and can contain some non-s
 
 The whole board was designed using EasyEDA.
 
-- Create animations with up to 256 frames! Thats a 128 Seconds long animation!
+- Create animations with up to 256 frames! Thats a 128 Seconds long animation! (This still needs testing if all of this fits in the ESP32 code)
+
+# WiFi Setup
+
+1. Enter the SSID of your Wifi in [WiFiCredentials.h:1](https://github.com/Subtixx/ChristmasTreeESP32/blob/6ed7a89fb9c6c5deb8025a748663b42830a94d5e/esp32_code/WiFiCredentials.h#L1)
+2. Enter the password of your Wifi in [WiFiCredentials.h:2](https://github.com/Subtixx/ChristmasTreeESP32/blob/6ed7a89fb9c6c5deb8025a748663b42830a94d5e/esp32_code/WiFiCredentials.h#L2)
 
 # PCB Preview
 
@@ -28,7 +33,7 @@ The whole board was designed using EasyEDA.
 </table>
 
 
-# Preview
+# Webpage Preview
 
 ![Preview](https://user-images.githubusercontent.com/20743379/144642977-bbb2b022-0c0c-4441-a916-1a5c6091e8bc.png)
 
