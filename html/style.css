@@ -1,0 +1,137 @@
+body {
+    background: #000;
+}
+
+#toolContainer {
+    float: left;
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#toolContainer div {
+    margin-bottom: 2vh;
+}
+
+#toolContainer #animationInfo {
+    color: #FFF;
+    display: inline-block;
+}
+
+#copyright {
+    text-align: right;
+    color: #FFF;
+    position: absolute;
+    top: 92%;
+    left: 88.5%;
+}
+
+#copyright p {
+    margin: 0;
+}
+
+#band1 {
+    fill: rgba(0, 255, 247, 0.5);
+}
+
+#band2 {
+    fill: rgba(0, 255, 247, 0.5);
+}
+
+#band3 {
+    fill: rgba(0, 255, 247, 0.5);
+}
+
+#band4 {
+    fill: rgba(0, 255, 247, 0.5);
+}
+
+#band5 {
+    fill: rgba(0, 255, 247, 0.5);
+}
+
+button, select, input {
+    margin-left: 5px;
+    margin-right: 5px;
+    padding: 25px;
+    font-size: 21px;
+
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+}
+
+button:disabled, select:disabled, input:disabled {
+    background: #cccccc;
+}
+
+button:not(:disabled):hover, select:not(:disabled):hover, input:not(:disabled):hover {
+    background: #EEEEEE;
+}
+
+@keyframes example {
+    0% {
+        background-color: #FF0000;
+        color: #FFFFFF;
+    }
+    25% {
+        background-color: #00FF00;
+        color: #000000;
+    }
+    50% {
+        background-color: #0000FF;
+        color: #FFFFFF;
+    }
+    75% {
+        background-color: #FFFF00;
+        color: #000000;
+    }
+    100% {
+        background-color: #FF0000;
+        color: #FFFFFF;
+    }
+}
+
+button#fillRandom {
+    animation: example 10s infinite;
+}
+
+button#fillRed {
+    background: #FF0000;
+    color: #ffffff;
+}
+
+button#fillGreen {
+    background: #00FF00;
+    color: #000000;
+}
+
+button#fillBlue {
+    background: #0000FF;
+    color: #ffffff;
+}
+
+button#fillYellow {
+    background: #FFFF00;
+    color: #000000;
+}
+
+button#fillRed:hover {
+    background: #c80000;
+}
+
+button#fillGreen:hover {
+    background: #00c800;
+}
+
+button#fillBlue:hover {
+    background: #0000c8;
+}
+
+button#fillYellow:hover {
+    background: #c8c800;
+}
+
+#animationInfo {
+    padding-left: 25px;
+    font-size: 21px;
+}

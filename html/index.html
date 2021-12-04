@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="style.css">
+    <script
+            src="//code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+
+    <title>ChristmasTree PCB</title>
+</head>
+<body>
+<div id="toolContainer">
+    <div>
+        <button id="play">Play</button>
+        <button id="stop" disabled>Stop</button>
+        <button id="save">Save</button>
+        <button id="export">Export</button>
+        <p id="animationInfo">
+            Total time: <span id="totalTime">0</span> s
+            <br/>
+            Frame: <span id="currentFrame">0</span> / <span id="totalFrames">0</span>
+        </p>
+    </div>
+    <div>
+        <button id="removeFrame">Remove Last Frame</button>
+        <button id="addFrame">Add Frame</button>
+        <button id="dupeFrame">Duplicate Frame</button>
+    </div>
+    <div>
+        <button id="fillRandom">Randomize Colors</button>
+        <button id="fillRed">Fill Red</button>
+        <button id="fillGreen">Fill Green</button>
+        <button id="fillBlue">Fill Blue</button>
+        <button id="fillYellow">Fill Yellow</button>
+        <!-- Clear -->
+        <button id="fillClear">Clear</button>
+    </div>
+    <div>
+        <button id="firstFrame" title="First frame"><<</button>
+        <button id="prevFrame" title="Previous frame"><</button>
+        <select id="frameSelect">
+        </select>
+        <button id="nextFrame" title="Next frame">></button>
+        <button id="lastFrame" title="Last frame">>></button>
+    </div>
+</div>
+
+<div id="copyright">
+    <p>Version 1.0</p>
+    Copyright &copy; 2021 Dominic Hock.<br />
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a>
+</div>
+<!--<img src="bottom.svg" style="min-width:90%; max-height: 90%; position: absolute;margin: auto;top: 0;left: 0;right: 0;bottom: 0;" />-->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" stroke-linecap="round"
+     stroke-linejoin="round" stroke-width="0" fill-rule="evenodd" clip-rule="evenodd" id="eNWMZ5_ttHxyU0fLWF7n_bottom"
+     viewBox="0 0 77698.57 97993.2"
+     style="z-index: -1; min-width:90%; max-height: 80%; position: absolute;margin: auto;top: 15vh;left: 0;right: 0;bottom: 0;">
+    <defs>
+        <style>.eNWMZ5_ttHxyU0fLWF7n_fr4 {
+            color: #666666;
+        }
+
+        .eNWMZ5_ttHxyU0fLWF7n_sm {
+            color: #004200;
+            opacity: 0.75;
+        }
+
+        .eNWMZ5_ttHxyU0fLWF7n_ss {
+            color: #ffffff;
+        }
+        </style>
+        <g id="eNWMZ5_ttHxyU0fLWF7n_bottom_silkscreen">
+            <path d="M 75819 19939 75692 19431 75438 19177 75311 18415 75057 17526 74549 16891 74041 16637 73787 16256 73406 15494 73279 14859 74930 14605 78105 14732 80137 14986 80518 15113 80645 15494 80772 15748 80772 15875 79248 17399 76962 19050"/>
+            <path d="M 73787 34036 73660 33655 73152 33401 72644 32766 71501 32131 70739 31115 70104 30734 70104 30353 73533 29845 75311 30099 76073 30480 76327 31115 76327 31623 75057 32893"/>
+            <path d="M 67818 50419 67183 50038 66675 49403 66548 48768 65786 47752 64643 46990 63754 45847 63627 45720 69850 46355 70358 47498 70358 48133"/>
+            <path d="M 58293 68834 58166 67945 58293 67056 58039 65659 57404 64516 56769 63119 56642 61976 61087 62738 62103 63500 62484 64135 62484 64516 61722 65405 60071 67183"/>
+            <path d="M 51816 83566 51689 82296 51181 81661 51435 80137 51054 79121 51689 78232 51816 76962 53340 77470 54737 79375 54737 80010 53213 81915"/>
+            <path d="M 39243 99885.5 35306 94170.5 35814 93853 36068 93980 36449 93853 37592 93980 38100 93662.5 39116 93853 40132 93789.5 41148 94043.5 41910 93916.5 43053 94107 42418 95123 41021 97345.5 39370 99885.5"/>
+            <path d="M 26924 85090 26035 84201 24765 82423 24130 79883 27559 77470 27051 78486 27305 79629 27178 80772 27559 81915 27305 83058 27559 84328"/>
+            <path d="M 20574 68707 18542 66294 17780 65151 17780 64262 17907 63881 18288 63373 19177 62865 23241 62357 23241 62992 22860 63754 21971 64770 21590 66167 20701 67310"/>
+            <path d="M 13335 49022 11938 46863 11557 45720 11684 45339 11938 45085 12954 44450 16764 44958 16256 45466 16129 45847 15875 46228 15113 46736 14859 47752 14097 48641"/>
+            <path d="M 10033 34925 7239 30988 6731 29972 6604 29464 6985 29083 8763 28702 12827 29718 12446 30099 11811 30480 11684 31242 10922 31877 10287 32766 10287 33909"/>
+            <path d="M 6096 17653 3175 14224 6477 13081 10922 13843 10287 14478 9017 14859 8509 15494 7366 15875 7112 16891 6477 17018"/>
+
+            <rect x="0" y="13000" width="100000" height="15000" fill="#FF0000" id="band1"/>
+            <rect x="0" y="29000" width="100000" height="15000" fill="#00FF00" id="band2"/>
+            <rect x="0" y="45000" width="100000" height="15000" fill="#0000FF" id="band3"/>
+            <rect x="0" y="61000" width="100000" height="15000" fill="#F0F000" id="band4"/>
+            <rect x="0" y="77000" width="100000" height="15000" fill="#FF00F0" id="band5"/>
+        </g>
+        <clipPath id="eNWMZ5_ttHxyU0fLWF7n_bottom_outline">
+            <path d="M 41656 2032 51562 2032 M 41656 2032 41656 10160 40640 10160 40640 2032 31242 2032 34340.85 13792.2 34213.85 16764 34061.42 18186.42 33934.42 18872.2 33147 18872.2 27508.14 18313.42 16078.2 15494 11023.57 13868.42 6527.79 13030.2 3175 14249.42 16637 29895.79 12776.2 29743.42 8763 28676.57 6934.2 29133.79 6553.2 29438.57 6654.79 29921.2 7213.57 31064.2 10160 35077.42 16484.57 43002.2 16992.57 44043.57 17195.79 44602.42 17145 44831 16764 44983.42 14224 44602.42 12979.42 44399.2 12065 44932.57 11684 45313.57 11582.42 45770.79 11887.2 46913.79 17246.57 54508.42 23190.14 61925.2 23342.57 62280.79 19100.79 62890.42 18237.2 63423.79 17881.57 63855.57 17805.42 64490.57 17805.42 65125.57 18059.42 65684.42 18923 66827.42 26238.14 75184 27559 77444.57 24053.85 79883 24688.85 82270.57 26035 84201 34290 92837 39319.14 100025.2 44094.42 92633.79 53467 81635.57 54330.57 80568.79 54762.42 80035.42 54737 79349.57 53263.85 77393.79 51866.85 76962 51308 76631.79 51562 76022.2 52781.14 74015.57 59969.42 67284.57 62280.85 64871.57 62484 64566.79 62509.42 64160.42 62153.85 63525.42 61112.42 62738 55753 61747.42 63398.42 53949.57 67818 50419 69900.85 48615.57 70332.57 48158.42 70358 47523.42 69850 46278.79 61925.14 45516.79 68834 38049.2 72974.14 34772.57 74904.57 33096.2 75793.57 32258 76200 31826.2 76403.14 31597.57 76403.14 31191.2 76073 30454.57 75336.42 30124.42 73609.14 29895.79 69977 30302.2 63068.14 30784.79 70612 23774.42 79171.85 17500.57 80873.57 15824.2 80518 15062.2 79756 14909.79 78105 14681.2 74879.14 14554.2 52120.85 18846.79 46507.42 18973.79 45720 18897.57 45720 18161 45821.57 16687.79 46304.14 13665.2 51536.7 2057.37"
+                  fill="none" stroke-width="152"/>
+        </clipPath>
+        <mask id="eNWMZ5_ttHxyU0fLWF7n_bottom_mech-mask">
+            <g fill="#000" stroke="#000">
+                <rect x="3175" y="2032" width="77698.57" height="97993.2" fill="#fff"/>
+            </g>
+        </mask>
+        <mask id="eNWMZ5_ttHxyU0fLWF7n_bottom_sm-mask">
+            <g fill="#000" stroke="#000">
+                <rect x="3175" y="2032" width="77698.57" height="97993.2" fill="#fff"/>
+            </g>
+        </mask>
+    </defs>
+    <g transform="translate(0,107057.2) scale(1,-1)">
+        <g mask="url(#eNWMZ5_ttHxyU0fLWF7n_bottom_mech-mask)" clip-path="url(#eNWMZ5_ttHxyU0fLWF7n_bottom_outline)"
+           transform="translate(84048.57,0) scale(-1,1)">
+            <rect x="3175" y="2032" width="77698.57" height="97993.2" fill="currentColor"
+                  class="eNWMZ5_ttHxyU0fLWF7n_fr4"/>
+            <g mask="url(#eNWMZ5_ttHxyU0fLWF7n_bottom_sm-mask)">
+                <rect x="3175" y="2032" width="77698.57" height="97993.2" fill="currentColor"
+                      class="eNWMZ5_ttHxyU0fLWF7n_sm"/>
+                <use xlink:href="#eNWMZ5_ttHxyU0fLWF7n_bottom_silkscreen" fill="currentColor" stroke="currentColor"
+                     class="eNWMZ5_ttHxyU0fLWF7n_ss"/>
+            </g>
+        </g>
+    </g>
+
+    <g transform="translate(0,5000)">
+        <g>
+            <text x="44000" y="19000" font-size="3000" fill="White" font-weight="bold" text-anchor="middle"
+                  id="band5Text">OFF
+            </text>
+            <rect x="0" y="10000" width="85000" height="15000" fill="#FF0F00AA" fill-opacity="0" id="band5Container"/>
+        </g>
+        <g>
+            <text x="44000" y="35000" font-size="3000" fill="White" font-weight="bold" text-anchor="middle"
+                  id="band4Text">OFF
+            </text>
+            <rect x="0" y="26000" width="85000" height="15000" fill="#00FF00AA" fill-opacity="0" id="band4Container"/>
+        </g>
+        <g>
+            <text x="44000" y="51000" font-size="3000" fill="White" font-weight="bold" text-anchor="middle"
+                  id="band3Text">OFF
+            </text>
+            <rect x="0" y="42000" width="85000" height="15000" fill="#00FFFFAA" fill-opacity="0" id="band3Container"/>
+        </g>
+        <g>
+            <text x="44000" y="66500" font-size="3000" fill="White" font-weight="bold" text-anchor="middle"
+                  id="band2Text">OFF
+            </text>
+            <rect x="0" y="58000" width="85000" height="15000" fill="#FFFF00AA" fill-opacity="0" id="band2Container"/>
+        </g>
+        <g>
+            <text x="44000" y="80000" font-size="3000" fill="White" font-weight="bold" text-anchor="middle"
+                  id="band1Text">OFF
+            </text>
+            <rect x="0" y="74000" width="85000" height="15000" fill="#FF0000AA" fill-opacity="0" id="band1Container"/>
+        </g>
+    </g>
+</svg>
+</body>
+</html>
