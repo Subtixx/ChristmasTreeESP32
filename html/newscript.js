@@ -66,33 +66,23 @@ class Color {
             otherColor.getBlue() === this.#b;
     }
 
-    cycle() {
-        if (this.equals(Color.OFF)) {
-            this.#r = 255;
-            this.#g = 0;
-            this.#b = 0;
-        } else if (this.equals(Color.RED)) {
-            this.#r = 0;
-            this.#g = 255;
-            this.#b = 0;
-        } else if (this.equals(Color.GREEN)) {
-            this.#r = 0;
-            this.#g = 0;
-            this.#b = 255;
-        } else if (this.equals(Color.BLUE)) {
-            this.#r = 255;
-            this.#g = 255;
-            this.#b = 0;
-        } else if (this.equals(Color.YELLOW)) {
-            this.#r = 255;
-            this.#g = 255;
-            this.#b = 255;
-        } else if (this.equals(Color.WHITE)) {
-            this.#r = 0;
-            this.#g = 0;
-            this.#b = 0;
-        } else {
-            throw new Error("Unknown color " + this.toString());
+    cycle(frame, band) {
+        const colors = [Color.OFF, 
+                        Color.RED, 
+                        Color.GREEN, 
+                        Color.BLUE, 
+                        Color.YELLOW, 
+                        Color.WHITE];
+
+        colors.forEach((color,i) => {
+            if (this.equals(color)) {
+                frame[band] = i < colors.length - 1 ? colors[i + 1] : colors[0];
+                colors.splice(i, 1);
+            }
+        });
+        
+        if (colors.length === 6) {
+            throw new Error("Unknown color: {r: " + this.#r + ", g: " + this.#g + ", b: " + this.#b + "}");
         }
     }
 
@@ -582,12 +572,13 @@ $(document).ready(function () {
         anim.setFrameColor(currentFrame, Color.OFF, Color.OFF, Color.OFF, Color.OFF, Color.OFF);
     });
 
-    // Bind click event on band 1 button
-    $('#band1Container').click(function () {
-        let currentFrame = parseInt(frameSelectDropdown.val());
-
-        console.log(Color.RED);
-        anim.getFrame(currentFrame).bandColor1.cycle();
-        anim.getFrame(currentFrame).setActive();
-    });
+    // Bind click event on band buttons
+    for (let i = 1; i < 6; i++) {
+        $(`#band${i}Container`).click(function () {
+            const currentFrame = parseInt(frameSelectDropdown.val());
+            const frame = anim.getFrame(currentFrame);
+            frame[`bandColor${i}`].cycle(frame, `bandColor${i}`);
+            frame.setActive();
+        });
+    }
 });
