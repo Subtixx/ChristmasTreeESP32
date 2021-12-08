@@ -48,6 +48,7 @@ This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
 - Pin 35 is connected.. However Pin 35 cannot be an output.
 - Some resistors are in series and not connected to the LED. Identified ones are:
   - Pin 17
+- The used part for the ESP32 has the wrong footprint (atleast the one I bought AZDelivery ESP32).. It works when bending while soldering but it should be fixed.
 
 # Technical explanation
 
