@@ -45,6 +45,9 @@ This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
 # Issues with the current board
 
 - I have not checked for the pinout of the ESP32... So I assume there are some reserved GPIO pins connected :/.
+- Pin 35 is connected.. However Pin 35 cannot be an output.
+- Some resistors are in series and not connected to the LED. Identified ones are:
+  - Pin 17
 
 # Technical explanation
 
