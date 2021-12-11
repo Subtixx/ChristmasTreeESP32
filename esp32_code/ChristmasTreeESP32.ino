@@ -5,15 +5,49 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 
+#define DEBUG 1
+
 AsyncWebServer server(80);
 
 byte rowSetup[][3] = {
-    {32, 33, 25},
-    {26, 27, 14},
+  {32, 33, 25},
+  {26, 27, 14},
 };
 
 ushort frameCount = 0;
 unsigned char **frames;
+
+short blue[] = {
+  33, // TOP
+  4, // MIDDLE LEFT
+  25, // MIDDLE RIGHT
+  15, // BOTTOM LEFT
+  12, // BOTTOM RIGHT
+  5, // MIDDLE BOTTOM
+};
+
+short green[] = {
+  32, // TOP
+  16, // MIDDLE LEFT
+  26, // MIDDLE RIGHT
+  2, // BOTTOM LEFT
+  14, // BOTTOM RIGHT
+  18, // MIDDLE BOTTTOM
+};
+
+short red[] = {
+  21, // TOP
+  17, // MIDDLE LEFT
+  27, // MIDDLE RIGHT
+  0, // BOTTOM LEFT
+  13, // BOTTOM RIGHT
+  19, // MIDDLE BOTTOM
+};
+
+String strColors[5] = { "OFF", "RED", "GREEN", "BLUE", "YELLOW" };
+
+// 0, 1, 2, 3, 4, 5
+// TOP, MIDDLE LEFT, MIDDLE RIGHT, BOTTOM LEFT, BOTTOM RIGHT, MIDDLE BOTTOM
 
 // New layout:
 // Frames 1 - 256
@@ -50,74 +84,119 @@ void setup()
 {
   Serial.begin(115200);
   delay(10);
-  ConnectToWiFi();
 
   // This setups all the pins as outputs
-  for (int i = 0; i < sizeof(rowSetup) / sizeof *(rowSetup); i++)
+  for (int i = 0; i < sizeof(red) / sizeof * (red); i++)
   {
-    pinMode(rowSetup[i][0], OUTPUT); // R
-    pinMode(rowSetup[i][1], OUTPUT); // G
-    pinMode(rowSetup[i][2], OUTPUT); // B
+    pinMode(red[i], OUTPUT);
+    digitalWrite(red[i], LOW);
   }
 
+  for (int i = 0; i < sizeof(green) / sizeof * (green); i++)
+  {
+    pinMode(green[i], OUTPUT);
+    digitalWrite(green[i], LOW);
+  }
+
+  for (int i = 0; i < sizeof(blue) / sizeof * (blue); i++)
+  {
+    pinMode(blue[i], OUTPUT);
+    digitalWrite(blue[i], LOW);
+  }
+  
+  delay(10);
+  ConnectToWiFi();
+
   server.on(
-      "/post",
-      HTTP_POST,
-      [](AsyncWebServerRequest *request) {},
-      NULL,
-      [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+    "/post",
+    HTTP_POST,
+  [](AsyncWebServerRequest * request) {},
+  NULL,
+  [](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total)
+  {
+#ifdef DEBUG
+    Serial.write("Got data: ");
+    for (size_t i = 0; i < len; i++)
+    {
+      Serial.write(data[i]);
+    }
+    Serial.println();
+#endif
+
+    DynamicJsonDocument doc(4096);
+    DeserializationError err = deserializeJson(doc, data);
+    if (err)
+    {
+      Serial.println("deserializeJson() failed with code " + String(err.f_str()));
+
+      request->send(500, "application/json", "{\"result\": 1, \"msg\": \"" + String(err.f_str()) + "\"}");
+      return;
+    }
+    // all frames of animations
+    JsonArray jsonFrames = doc.as<JsonArray>();
+
+#ifdef DEBUG
+    Serial.println("Got " + String(jsonFrames.size()) + " frames of animation.");
+#endif
+
+    if (frames != NULL)
+    {
+      for (int i = 0; i < frameCount; ++i)
       {
-        for (size_t i = 0; i < len; i++)
-        {
-          Serial.write(data[i]);
-        }
+        delete[] frames[i];
+      }
+      delete[] frames;
+    }
 
-        DynamicJsonDocument doc(4096);
-        DeserializationError err = deserializeJson(doc, data);
-        if (err)
-        {
-          Serial.print(F("deserializeJson() failed with code "));
-          Serial.println(err.f_str());
-          request->send(500);
-          return;
-        }
-        // all frames of animations
-        JsonArray jsonFrames = doc.as<JsonArray>();
+    frameCount = jsonFrames.size();
+    frames = new unsigned char *[frameCount];
+    for (int i = 0; i < frameCount; ++i)
+      frames[i] = new unsigned char[6] {0};
 
-        if (frames != NULL)
-        {
-          for (int i = 0; i < frameCount; ++i)
-          {
-            delete[] frames[i];
-          }
-          delete[] frames;
-        }
-
-        frameCount = jsonFrames.size();
+    for (size_t i = 0; i < jsonFrames.size(); i++)
+    {
+      // For now we just evaluate band with index 0
+      JsonArray bands = jsonFrames[i];
+      if (bands.size() < 6)
+      {
+        frameCount = 1;
         frames = new unsigned char *[frameCount];
         for (int i = 0; i < frameCount; ++i)
-          frames[i] = new unsigned char[5]{0};
+          frames[i] = new unsigned char[6] {0};
 
-        for (size_t i = 0; i < jsonFrames.size(); i++)
-        {
-          // For now we just evaluate band with index 0
-          JsonArray bands = jsonFrames[i];
-          Serial.println();
-          Serial.print("Color: ");
-          Serial.print(bands[0].as<unsigned char>(), DEC);
-          Serial.println();
+        request->send(200, "application/json", "{\"result\": 1, \"msg\": \"Too few band colors.\"}");
+        return;
+      }
 
-          // Color of the first band.
-          frames[i][0] = bands[0].as<unsigned char>();
-          frames[i][1] = bands[1].as<unsigned char>();
-          frames[i][2] = bands[2].as<unsigned char>();
-          frames[i][3] = bands[3].as<unsigned char>();
-          frames[i][4] = bands[4].as<unsigned char>();
-        }
+#ifdef DEBUG
+      Serial.println();
+      Serial.print("Color: ");
+      Serial.print(bands[0].as<unsigned char>(), DEC);
+      Serial.println();
+#endif
 
-        Serial.println();
-        request->send(200);
-      });
+      // Color of the first band.
+      // TOP
+      frames[i][0] = bands[0].as<unsigned char>();
+
+      // MIDDLE LEFT
+      frames[i][1] = bands[1].as<unsigned char>();
+
+      // MIDDLE RIGHT
+      frames[i][2] = bands[2].as<unsigned char>();
+
+      // BOTTOM LEFT
+      frames[i][3] = bands[3].as<unsigned char>();
+
+      // BOTTOM RIGHT
+      frames[i][4] = bands[4].as<unsigned char>();
+
+      // MIDDLE BOTTOM
+      frames[i][5] = bands[5].as<unsigned char>();
+    }
+
+    request->send(200, "application/json", "{\"result\": 0}");
+  });
   server.begin();
 }
 
@@ -125,57 +204,38 @@ void loop()
 {
   if (frameCount == 0)
   {
-    delay(1000);
+    delay(500);
     return;
   }
 
   for (size_t i = 0; i < frameCount; i++)
   {
+#ifdef DEBUG
     Serial.print("Frame ");
     Serial.print(i);
     Serial.print(": ");
     Serial.println();
-    Serial.println(frames[i][0]); // Output Color of first band
-    Serial.println(frames[i][1]);
-    Serial.println(frames[i][2]);
-    Serial.println(frames[i][3]);
-    Serial.println(frames[i][4]);
+    Serial.println("\t" + strColors[frames[i][0]]);
+    Serial.println(strColors[frames[i][1]] + "\t\t" + strColors[frames[i][2]]);
+    Serial.println(strColors[frames[i][3]] + "\t\t" + strColors[frames[i][4]]);
+    Serial.println("\t" + strColors[frames[i][5]]);
+#endif
 
-    for (size_t j = 0; j < 5; j++)
+    for (size_t j = 0; j < 6; j++)
     {
-      if (frames[i][j] == 1)
-      {
-        digitalWrite(rowSetup[j][0], HIGH);
-        digitalWrite(rowSetup[j][1], LOW);
-        digitalWrite(rowSetup[j][2], LOW);
-      }
-      else if (frames[i][j] == 2)
-      {
-        digitalWrite(rowSetup[j][0], LOW);
-        digitalWrite(rowSetup[j][1], HIGH);
-        digitalWrite(rowSetup[j][2], LOW);
-      }
-      else if (frames[i][0] == 3)
-      {
-        digitalWrite(rowSetup[j][0], LOW);
-        digitalWrite(rowSetup[j][1], LOW);
-        digitalWrite(rowSetup[j][2], HIGH);
-      }
-      else if (frames[i][0] == 4)
-      {
-        digitalWrite(rowSetup[j][0], HIGH);
-        digitalWrite(rowSetup[j][1], HIGH);
-        digitalWrite(rowSetup[j][2], LOW);
-      }
-      else
-      {
-        digitalWrite(rowSetup[j][0], LOW);
-        digitalWrite(rowSetup[j][1], LOW);
-        digitalWrite(rowSetup[j][2], LOW);
-      }
+      digitalWrite(red[j], (frames[i][j] == 1 || frames[i][j] == 4) ? HIGH : LOW);
+      digitalWrite(green[j], (frames[i][j] == 2 || frames[i][j] == 4) ? HIGH : LOW);
+      digitalWrite(blue[j], (frames[i][j] == 3) ? HIGH : LOW);
     }
     delay(500);
   }
+
+#ifdef DEBUG
   Serial.println("-------------------------");
-  delay(30000);
+#endif
+
+  if (frameCount == 1)
+  {
+    delay(5000);
+  }
 }
