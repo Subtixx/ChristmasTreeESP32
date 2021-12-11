@@ -21,7 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String appVersion = "?.?.?";
   String appBuild = "?";
 
-  String ipAddress = "559713fa-6c9c-48fc-acac-179770aa82ad.mock.pstmn.io";
+  String ipAddress = "";
 
   late TextEditingController _controller;
 
