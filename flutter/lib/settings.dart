@@ -21,7 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String appVersion = "?.?.?";
   String appBuild = "?";
 
-  String ipAddress = "";
+  String ipAddress = "559713fa-6c9c-48fc-acac-179770aa82ad.mock.pstmn.io";
 
   late TextEditingController _controller;
 
@@ -51,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var response = await testApiUrl();
     if (response.statusCode != 200) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         duration: Duration(seconds: 1),
         content: Text("Request to ESP32 IP failed. Please check!"),
       ));
