@@ -1,4 +1,34 @@
-# ChristmasTreeESP32
+<div id="top"></div>
+
+<br />
+<div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="https://user-images.githubusercontent.com/20743379/144643475-46dab2a0-32f6-418d-850d-f22997feaaa3.png" alt="Logo" width="80">
+  </a>
+
+  <h3 align="center">ChristmasTreeESP32</h3>
+
+  <p align="center">
+    A PCB Christmas tree using an ESP32 and 12 RGB LEDs
+  </p>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#about-the-project">About The Project</a></li>
+    <li><a href="#why-have-i-created-this">Why have I created this?</a></li>
+    <li><a href="#pcb-preview">PCB Preview</a></li>
+    <li><a href="#webpage-preview">Webpage Preview</a></li>
+    <li><a href="#android-app">Android App</a></li>
+    <li><a href="#wifi-setup">WiFi Setup</a></li>
+    <li><a href="#issues-with-the-current-board">Issues with the current board</a></li>
+  </ol>
+</details>
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
 This is a christmas tree as PCB with RGB LEDs. It is controlled using an ESP32 and contains 12 RGB LEDs. Which can be configured in pairs of 2 so it has 6 different "zones" for colors.
 
@@ -7,6 +37,7 @@ The software can support up to 256 frames of animation (While a frame of animati
 **Before downloading the gerber files and ordering a PCB however please look at [Issues with the current board](#issues-with-the-current-board), since this was my first ever PCB build I have made some mistake in the design which are outlined in the file linked above.**
 
 The whole board was designed using EasyEDA. v2 will be designed in CircuitMaker if it will ever come out.
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 # Why have I created this?
 
@@ -16,10 +47,7 @@ I wanted a tree which looked more realistic, had the ability to change animation
 
 This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
 
-# WiFi Setup
-
-1. Enter the SSID of your Wifi in [WiFiCredentials.h:1](https://github.com/Subtixx/ChristmasTreeESP32/blob/6ed7a89fb9c6c5deb8025a748663b42830a94d5e/esp32_code/WiFiCredentials.h#L1)
-2. Enter the password of your Wifi in [WiFiCredentials.h:2](https://github.com/Subtixx/ChristmasTreeESP32/blob/6ed7a89fb9c6c5deb8025a748663b42830a94d5e/esp32_code/WiFiCredentials.h#L2)
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 # PCB Preview
 
@@ -38,13 +66,17 @@ This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
   </tr>
 </table>
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 
-# Webpage Preview (Only frontend part is done)
+# Webpage Preview
+
+_(Only frontend part is done)_
 
 <img src="https://user-images.githubusercontent.com/20743379/144642977-bbb2b022-0c0c-4441-a916-1a5c6091e8bc.png" width="256" />
 
-# Android App
+<p align="right">(<a href="#top">back to top</a>)</p>
 
+# Android App
 
 <table>
   <tr>
@@ -66,6 +98,15 @@ This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
   </tr>
 </table>
 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+# WiFi Setup
+
+1. Enter the SSID of your Wifi in [WiFiCredentials.h:1](https://github.com/Subtixx/ChristmasTreeESP32/blob/6ed7a89fb9c6c5deb8025a748663b42830a94d5e/esp32_code/WiFiCredentials.h#L1)
+2. Enter the password of your Wifi in [WiFiCredentials.h:2](https://github.com/Subtixx/ChristmasTreeESP32/blob/6ed7a89fb9c6c5deb8025a748663b42830a94d5e/esp32_code/WiFiCredentials.h#L2)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 # Issues with the current board
 
 **NOTE:** As I am no electronic engineer the PCB does look ugly and can contain some non-standard things. Also after placing the order with JLCPCB, I have discovered that the silkscreen of the RGB LEDs are cut off, woops my mistake. Also I could not figure out how to get rid of the ESP32 Silkscreen.
@@ -77,6 +118,8 @@ This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
   - Pin 17
 - The used part for the ESP32 has the wrong footprint (atleast the one I bought AZDelivery ESP32).. It works when bending while soldering but it should be fixed.
 - It is missing an LED on the top of the tree. It looks odd when having the tree turned on without one.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 # Technical explanation
 
@@ -99,3 +142,6 @@ So in this example its a 5 frame animation (2.5 seconds long as one frame takes 
 3. Blue
 4. Yellow
 5. Off
+
+
+<p align="right">(<a href="#top">back to top</a>)</p>
