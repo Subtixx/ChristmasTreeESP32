@@ -119,6 +119,7 @@ _(Only frontend part is done)_
 - The used part for the ESP32 has the wrong footprint (atleast the one I bought AZDelivery ESP32).. It works when bending while soldering but it should be fixed.
 - It is missing an LED on the top of the tree. It looks odd when having the tree turned on without one.
 - I have not used any ground plane. No idea if this is critical or if this makes me stupid. But I've connected the grounds for all LEDs using traces. Thinking about this one after the fact makes me feel dumb.
+- Not an issue but a note on my design, I didn't want to "harm" the look and feel of the tree. This is why I have only populated the front side with components.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
