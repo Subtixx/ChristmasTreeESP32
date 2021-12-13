@@ -34,7 +34,7 @@ This is a christmas tree as PCB with RGB LEDs. It is controlled using an ESP32 a
 
 The software can support up to 256 frames of animation (While a frame of animation is roughly 500ms long). The biggest animation I have tested had however only 20 frames.
 
-**Before downloading the gerber files and ordering a PCB however please look at [Issues with the current board](#issues-with-the-current-board), since this was my first ever PCB build I have made some mistake in the design which are outlined in the file linked above.**
+**Before downloading the gerber files and ordering a PCB please take a look at [Issues with the current board](#issues-with-the-current-board), since this was my first ever PCB build I have made some mistake in the design which are outlined in the file linked above.**
 
 The whole board was designed using EasyEDA. v2 will be designed in CircuitMaker if it will ever come out.
 <p align="right">(<a href="#top">back to top</a>)</p>
