@@ -5,7 +5,7 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 
-#define DEBUG 1
+//#define DEBUG 1
 
 AsyncWebServer server(80);
 
