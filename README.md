@@ -1,18 +1,19 @@
 # ChristmasTreeESP32
 
-This is my first ever public PCB build. Version 0.1 is ordered from JLCPCB and should be here in a couple of days of writing this (12/03/2021).
+This is a christmas tree as PCB with RGB LEDs. It is controlled using an ESP32 and contains 12 RGB LEDs. Which can be configured in pairs of 2 so it has 6 different "zones" for colors.
 
-Since this is quite early in the development of this project, the PCB can contain issues so be aware! In the future I'd love to have more control over the LEDs. Currently the tree only has 5 "zones" as seen in the preview of the software. I'd love to support individual adressing of the LEDs to create even better animations.
+The software can support up to 256 frames of animation (While a frame of animation is roughly 500ms long). The biggest animation I have tested had however only 20 frames.
 
-As I am no electronic engineer the PCB does look ugly and can contain some non-standard things. Also after placing the order with JLCPCB, I have discovered that the silkscreen of the RGB LEDs are cut off, woops my mistake. Also I could not figure out how to get rid of the ESP32 Silkscreen.
+**Before downloading the gerber files and ordering a PCB however please look at [Issues with the current board](#issues-with-the-current-board), since this was my first ever PCB build I have made some mistake in the design which are outlined in the file linked above.**
 
-The whole board was designed using EasyEDA.
+The whole board was designed using EasyEDA. v2 will be designed in CircuitMaker if it will ever come out.
 
-- Create animations with up to 256 frames! Thats a 128 Seconds long animation! (This still needs testing if all of this fits in the ESP32 code)
+# Why have I created this?
 
-# Why?
+I know there are a number of soldering kits out there for a christmas tree as a PCB. However in my opinion those are lifeless and annoying. I had ordered one for christmas last year and it's not calming at all. The LEDs change color rapidly and in no order. 
 
-There are a number of soldering kits out there for a christmas tree as a PCB. However all of them are flawed in my opinion, they're missing an ESP32! (And are annoying since they're not calming at all!).
+I wanted a tree which looked more realistic, had the ability to change animations and could possibly also display several colors and not just red and green.
+
 This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
 
 # WiFi Setup
@@ -38,32 +39,60 @@ This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
 </table>
 
 
-# Webpage Preview
+# Webpage Preview (Only frontend part is done)
 
-![Preview](https://user-images.githubusercontent.com/20743379/144642977-bbb2b022-0c0c-4441-a916-1a5c6091e8bc.png)
+<img src="https://user-images.githubusercontent.com/20743379/144642977-bbb2b022-0c0c-4441-a916-1a5c6091e8bc.png" width="256" />
+
+# Android App
+
+
+<table>
+  <tr>
+    <td>
+      <img src="https://user-images.githubusercontent.com/20743379/145888885-788755b9-a393-4fc6-85ac-a924e099b9a1.png" width="256" style="float:left;" />
+      <br />
+      Main view
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/20743379/145889906-aa3e399e-f073-4acf-a8c9-6ca06bc6ad15.png" width="256" style="float:right;"/>
+      <br />
+      Settings view
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/20743379/145889624-89141aae-3e7c-4b9b-8181-3ff21f58e5d7.png" width="256" style="float:right;"/>
+      <br />
+      My files view
+    </td>
+  </tr>
+</table>
 
 # Issues with the current board
 
+**NOTE:** As I am no electronic engineer the PCB does look ugly and can contain some non-standard things. Also after placing the order with JLCPCB, I have discovered that the silkscreen of the RGB LEDs are cut off, woops my mistake. Also I could not figure out how to get rid of the ESP32 Silkscreen.
+
+- No idea why but I thought the PCB would be much much bigger than it is. It's smaller than the commercial one I got for christmas last year from ebay which was a huge disappointment to me.
 - I have not checked for the pinout of the ESP32... So I assume there are some reserved GPIO pins connected :/.
 - Pin 35 is connected.. However Pin 35 cannot be an output.
 - Some resistors are in series and not connected to the LED. Identified ones are:
   - Pin 17
 - The used part for the ESP32 has the wrong footprint (atleast the one I bought AZDelivery ESP32).. It works when bending while soldering but it should be fixed.
+- It is missing an LED on the top of the tree. It looks odd when having the tree turned on without one.
 
 # Technical explanation
 
-The JQuery script sents a POST request with all of the frames of animation. The animation frames look like this
+A post request has to be made to http://[IPofESP]/post with a JSON Encoded body. An example animation would look like this:
 ```json
 [
     [1, 0, 0, 0, 0],
     [2, 0, 0, 0, 0],
     [3, 0, 0, 0, 0],
+
     [4, 0, 0, 0, 0],
     [0, 0, 0, 0, 0]
 ]
 ```
 
-It's a 2D Array with the first dimension being the frame of animation and the second being the color of a "band" (I call the different LED groups bands).
+It's a 2D Array with the first dimension being the frame of animation and the second being the color of a LED group.
 So in this example its a 5 frame animation (2.5 seconds long as one frame takes roughly 500 ms). With the following values
 1. Red
 2. Green
