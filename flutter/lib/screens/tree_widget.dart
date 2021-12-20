@@ -59,7 +59,7 @@ class _TreeWidgetState extends State<TreeWidget> {
     for (int i = 0; i < count; i++) {
       treeButtons.add(
         ElevatedButton(
-          onPressed: () => colorPickerDialog(context, startIndex),
+          onPressed: () => colorPickerDialog(context, startIndex + i),
           child: const Text(""),
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(key
