@@ -5,7 +5,7 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 
-#define DEBUG 1
+//#define DEBUG 1
 
 AsyncWebServer server(80);
 
@@ -83,6 +83,12 @@ void ConnectToWiFi()
 }
 #pragma endregion
 
+#pragma region Not Found Page
+void notFound(AsyncWebServerRequest *request) {
+    request->send(404, "text/plain", "Not found");
+}
+#pragma endregion
+
 void setup()
 {
   Serial.begin(115200);
@@ -109,6 +115,32 @@ void setup()
   
   delay(10);
   ConnectToWiFi();
+
+  server.on(
+    "/get",
+    HTTP_GET,
+  [](AsyncWebServerRequest * request)
+  {
+#ifdef DEBUG
+    Serial.println("Got get request!");
+#endif
+    String result = "[";
+    for (int i = 0; i < frameCount; ++i)
+    {
+      String frame = String(frames[i][0]) + ", " +
+        String(frames[i][1]) + ", " +
+        String(frames[i][2]) + ", " +
+        String(frames[i][3]) + ", " +
+        String(frames[i][4]) + ", " +
+        String(frames[i][5]);
+
+      result += "[" + frame + "]";
+      if(i < frameCount-1)
+        result += ",";
+    }
+    result += "]";
+    request->send(200, "application/json", result);    
+  });
 
   server.on(
     "/post",
@@ -170,14 +202,6 @@ void setup()
         return;
       }
 
-#ifdef DEBUG
-      Serial.println();
-      Serial.print("Color: ");
-      Serial.print(bands[0].as<unsigned char>(), DEC);
-      Serial.println();
-#endif
-
-      // Color of the first band.
       // TOP
       frames[i][0] = bands[0].as<unsigned char>();
 
@@ -201,6 +225,7 @@ void setup()
 
     request->send(200, "application/json", "{\"result\": 0}");
   });
+  server.onNotFound(notFound);
   server.begin();
 }
 
