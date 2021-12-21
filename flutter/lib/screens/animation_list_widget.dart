@@ -37,12 +37,39 @@ class _AnimationListWidgetState extends State<AnimationListWidget> {
       itemBuilder: (c, i) {
         return InkWell(
           onTap: () {
-            load(i);
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Overwrite existing animation?"),
+                  content: const Text(
+                      "Would you like to load this animation?"),
+                  actions: [
+                    TextButton(
+                      child: const Text("No"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text("Yes"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+
+                        load(i);
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
           },
           child: ListTile(
-            title: Text(path.basename(_files[i]).substring(0, path.basename(_files[i]).length - 5)),
-            subtitle: Text(""),
-            trailing: Text(""),
+            title: Text(path.basename(_files[i]).substring(0, path
+                .basename(_files[i])
+                .length - 5)),
+            subtitle: const Text(""),
+            trailing: const Text(""),
           ),
         );
       },
@@ -59,7 +86,9 @@ class _AnimationListWidgetState extends State<AnimationListWidget> {
   void load(int idx) async {
     showSimpleDialog("Loading..", "Loading animation!", false);
     var fullPath = path.basename(_files[idx]);
-    var name = path.basename(_files[idx]).substring(0, path.basename(_files[idx]).length - 5);
+    var name = path.basename(_files[idx]).substring(0, path
+        .basename(_files[idx])
+        .length - 5);
 
     var data = await readDataFromFile(name);
     if (data != null) {

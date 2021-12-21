@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:esp_christmas_tree/utils/esp32_api.dart';
+import 'package:esp_christmas_tree/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -17,22 +19,27 @@ class SettingsWidget extends StatefulWidget {
 }
 
 class _SettingsWidgetState extends State<SettingsWidget> {
-  bool lockInBackground = true;
-  bool notificationsEnabled = true;
-
   String appVersion = "?.?.?";
   String appBuild = "?";
 
-  String ipAddress = "559713fa-6c9c-48fc-acac-179770aa82ad.mock.pstmn.io";
-  String communityUrl = "http://192.168.1.214/api";
+  TextEditingController? _controller;
 
-  late TextEditingController _controller;
+  String _esp32Ip = "";
+  String _communityApiUrl = "";
+
+  final List<List<String>> _changeList = [
+    ['v1.2.1', 'Internal refactoring', 'Temporarily disabled sharing'],
+    ['v1.2.0', 'Add sharing'],
+    ['v1.1.0', 'Add community tab'],
+    ['v1.0.0', 'First initial release'],
+  ];
 
   @override
   void initState() {
     super.initState();
 
-    loadOption();
+    _esp32Ip = key.currentState!.esp32Api.getIp();
+    _communityApiUrl = key.currentState!.communityApi.getUrl();
 
     PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
       setState(() {
@@ -42,60 +49,55 @@ class _SettingsWidgetState extends State<SettingsWidget> {
     });
   }
 
-  Future<void> loadOption() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      ipAddress = prefs.getString('ipAddress')!;
-      communityUrl = prefs.getString('communityUrl')!;
-    });
-  }
-
   Future<void> saveOption(bool isSelected) async {
+    Utils.showLoadingDialog(context, "Checking connection to ESP32...");
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var response = await testApiUrl();
-    if (response.statusCode != 200) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        duration: Duration(seconds: 1),
-        content: Text("Request to ESP32 IP failed. Please check!"),
-      ));
+
+    var validUrl = Uri.tryParse("http://" + _esp32Ip) != null ? true : false;
+    if (!validUrl) {
+      Navigator.of(context).pop();
+
+      Utils.showErrorDialog(
+          context, "Invalid IP", "Specified ESP32 IP is invalid.");
+      return;
     }
 
-    prefs.setString('ipAddress', ipAddress);
-    prefs.setString('communityUrl', communityUrl);
+    var esp32Api = Esp32Api(_esp32Ip);
+    var espApiResult = await esp32Api.testConnection();
+    if (!espApiResult) {
+      Navigator.of(context).pop();
 
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      duration: Duration(seconds: 1),
-      content: Text("Communication success!"),
-    ));
+      Utils.showErrorDialog(context, "Connection to ESP32 failed",
+          "Request to ESP32 IP failed. Please check!");
+      return;
+    }
+    Navigator.of(context).pop();
+
+    setState(() {
+      key.currentState!.esp32Api.setIp(_esp32Ip);
+      key.currentState!.communityApi.setUrl(_communityApiUrl);
+    });
+
+    prefs.setString('ipAddress', key.currentState!.esp32Api.getIp());
+    prefs.setString('communityUrl', key.currentState!.communityApi.getUrl());
+
+    Utils.showSimpleSnackbar(context, "Settings saved!");
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_controller != null) {
+      _controller!.dispose();
+    }
 
     super.dispose();
-  }
-
-  Future<http.Response> testApiUrl() {
-    return http.post(
-      Uri.parse("http://" + ipAddress + "/post"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: "[]",
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return buildSettingsList();
   }
-
-  List<List<String>> _changeList = [
-    ['v1.2.0', 'Add sharing'],
-    ['v1.1.0', 'Add community tab'],
-    ['v1.0.0', 'First initial release'],
-  ];
 
   Widget buildSettingsList() {
     return SettingsList(
@@ -106,102 +108,15 @@ class _SettingsWidgetState extends State<SettingsWidget> {
           tiles: [
             SettingsTile(
               title: "ESP32 IP",
-              subtitle: ipAddress,
+              subtitle: _esp32Ip,
               leading: const Icon(Icons.cloud_queue),
-              onPressed: (context) {
-                // TODO: Load from prefs?
-                _controller = TextEditingController(text: ipAddress);
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Set IP of ESP32'),
-                      content: SingleChildScrollView(
-                        child: TextFormField(
-                          controller: _controller,
-                          decoration:
-                              const InputDecoration(hintText: "IP Address"),
-                        ),
-                      ),
-                      actions: <Widget>[
-                        ElevatedButton(
-                          child: const Text('Cancel'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        ElevatedButton(
-                          child: const Text('Save'),
-                          onPressed: () {
-                            setState(() {
-                              ipAddress = _controller.value.text;
-                              key.currentState!.espIp = ipAddress;
-                            });
-
-                            saveOption(false);
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
+              onPressed: onSaveEsp32Ip,
             ),
             SettingsTile(
               title: "API URL",
-              subtitle: communityUrl,
+              subtitle: _communityApiUrl,
               leading: const Icon(Icons.cloud_queue),
-              onPressed: (context) {
-                // TODO: Load from prefs?
-                _controller = TextEditingController(text: communityUrl);
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Set URL of community'),
-                      content: SingleChildScrollView(
-                        child: TextFormField(
-                          controller: _controller,
-                          decoration:
-                              const InputDecoration(hintText: "eg http://192.168.1.1/api"),
-                        ),
-                      ),
-                      actions: <Widget>[
-                        ElevatedButton(
-                          child: const Text('Cancel'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        ElevatedButton(
-                          child: const Text('Save'),
-                          onPressed: () {
-                            try {
-                              Uri.parse("http://" + key.currentState!.communityUrl + "/api/creations/share");
-                            }catch(_){
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                duration: Duration(seconds: 1),
-                                content: Text("Invalid community url"),
-                              ));
-                              return;
-                            }
-                            setState(() {
-                              communityUrl = _controller.value.text;
-                              key.currentState!.communityUrl = communityUrl;
-                            });
-
-                            saveOption(false);
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
+              onPressed: onSaveCommunityApiUrl,
             ),
           ],
         ),
@@ -209,39 +124,39 @@ class _SettingsWidgetState extends State<SettingsWidget> {
           child: InkWell(
             onTap: () {
               showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      content: ListView.builder(
-                        itemBuilder: (c, i) {
-                          return ListTile(
-                            title: Text(_changeList[i][0]),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Divider(
-                                  color: Color(0xFFDDDDDD),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: getChangesWidget(i),
-                                ),
-                              ],
-                            ),
-                          );
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    content: ListView.builder(
+                      itemBuilder: (c, i) {
+                        return ListTile(
+                          title: Text(_changeList[i][0]),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Divider(
+                                color: Color(0xFFDDDDDD),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: getChangesWidget(i),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      itemCount: _changeList.length,
+                    ),
+                    actions: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
                         },
-                        itemCount: _changeList.length,
+                        child: const Text("Close"),
                       ),
-                      actions: [
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text("Close"),
-                        ),
-                      ],
-                    );
-                  },
+                    ],
+                  );
+                },
               );
             },
             child: Column(
@@ -273,5 +188,93 @@ class _SettingsWidgetState extends State<SettingsWidget> {
       result.add(Text(_changeList[idx][i]));
     }
     return result;
+  }
+
+  void onSaveEsp32Ip(BuildContext context) {
+    _controller = TextEditingController(text: _esp32Ip);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Set IP of ESP32'),
+          content: SingleChildScrollView(
+            child: TextFormField(
+              controller: _controller,
+              decoration: const InputDecoration(hintText: "IP Address"),
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Save'),
+              onPressed: () {
+                setState(() {
+                  _esp32Ip = _controller!.value.text;
+                });
+
+                saveOption(false);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void onSaveCommunityApiUrl(BuildContext context) {
+    _controller = TextEditingController(text: _communityApiUrl);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Set URL of community'),
+          content: SingleChildScrollView(
+            child: TextFormField(
+              controller: _controller,
+              decoration:
+                  const InputDecoration(hintText: "eg http://192.168.1.1/api"),
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Save'),
+              onPressed: () {
+                try {
+                  Uri.parse("http://" +
+                      key.currentState!.communityApi.getUrl() +
+                      "/api/creations/share");
+                } catch (_) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    duration: Duration(seconds: 1),
+                    content: Text("Invalid community url"),
+                  ));
+                  return;
+                }
+
+                setState(() {
+                  key.currentState!.communityApi.setUrl(_controller!.value.text);
+                });
+
+                saveOption(false);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

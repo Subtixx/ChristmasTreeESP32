@@ -37,7 +37,7 @@ class _CommunityWidgetState extends State<CommunityWidget> {
     page = 1;
 
     var response =
-        await http.get(Uri.parse("http://" + key.currentState!.communityUrl + "/api/creations/" + page.toString()));
+        await http.get(Uri.parse("http://" + key.currentState!.communityApi.getUrl() + "/api/creations/" + page.toString()));
     if (response.statusCode != 200) {
       showSnackBar("Failed to load");
       _refreshController.refreshFailed();
@@ -68,10 +68,8 @@ class _CommunityWidgetState extends State<CommunityWidget> {
   void _onLoading() async {
     page++;
 
-    print("Loading " "http://" +  key.currentState!.communityUrl + "/api/creations/" + page.toString());
-
     var response =
-        await http.get(Uri.parse("http://" + key.currentState!.communityUrl + "/api/creations/" + page.toString()));
+        await http.get(Uri.parse("http://" + key.currentState!.communityApi.getUrl() + "/api/creations/" + page.toString()));
     if (response.statusCode != 200) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         duration: Duration(seconds: 1),

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:esp_christmas_tree/data/animation.dart';
 import 'package:esp_christmas_tree/data/saved_files.dart';
+import 'package:esp_christmas_tree/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -9,7 +10,6 @@ import 'package:http/http.dart' as http;
 
 import '../main_old.dart';
 import '../main.dart';
-import 'community_widget.dart';
 
 class TreeWidget extends StatefulWidget {
   const TreeWidget({Key? key}) : super(key: key);
@@ -19,6 +19,17 @@ class TreeWidget extends StatefulWidget {
 }
 
 class _TreeWidgetState extends State<TreeWidget> {
+  TextEditingController? _controller;
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    if(_controller != null) {
+      _controller!.dispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,18 +44,20 @@ class _TreeWidgetState extends State<TreeWidget> {
               child: Text(key.currentState!.loadedFileName),
             ),
 
-            FrameTools(),
+            frameTools(),
             // Frame selection
-            FrameSelector(),
+            frameSelector(),
 
-            MiscTools(),
+            miscTools(),
+
+            paintTools(),
 
             treeRow(0, 1),
             treeRow(1, 2),
             treeRow(3, 2),
             treeRow(5, 1),
 
-            FileTools(),
+            fileTools(),
           ],
         ),
       ),
@@ -59,7 +72,17 @@ class _TreeWidgetState extends State<TreeWidget> {
     for (int i = 0; i < count; i++) {
       treeButtons.add(
         ElevatedButton(
-          onPressed: () => colorPickerDialog(context, startIndex + i),
+          onPressed: () => colorPickerDialog(context, (Color selectedColor) {
+            setState(() {
+              key.currentState!.animation
+                  .getFrame(key.currentState!.currentFrame)
+                  .setColor(startIndex + i, selectedColor);
+            });
+            Navigator.of(context).pop();
+          },
+              key.currentState!.animation
+                  .getFrame(key.currentState!.currentFrame)
+                  .getColor(startIndex + i)),
           child: const Text(""),
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(key
@@ -86,7 +109,8 @@ class _TreeWidgetState extends State<TreeWidget> {
     Colors.black
   ];
 
-  void colorPickerDialog(BuildContext context, int index) {
+  void colorPickerDialog(BuildContext context,
+      ValueSetter<Color> onSelectAction, Color preselection) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -94,16 +118,9 @@ class _TreeWidgetState extends State<TreeWidget> {
           title: const Text('Select new color'),
           content: SingleChildScrollView(
             child: BlockPicker(
-              pickerColor: key.currentState!.animation
-                  .getFrame(key.currentState!.currentFrame)
-                  .getColor(index),
+              pickerColor: preselection,
               onColorChanged: (value) {
-                setState(() {
-                  key.currentState!.animation
-                      .getFrame(key.currentState!.currentFrame)
-                      .setColor(index, value);
-                });
-                Navigator.of(context).pop();
+                onSelectAction(value);
               },
               availableColors: colorSelection,
             ),
@@ -121,7 +138,7 @@ class _TreeWidgetState extends State<TreeWidget> {
     );
   }
 
-  Widget MiscTools() {
+  Widget miscTools() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       mainAxisSize: MainAxisSize.max,
@@ -130,12 +147,6 @@ class _TreeWidgetState extends State<TreeWidget> {
             (key.currentState!.currentFrame + 1).toString() +
             " / " +
             key.currentState!.animation.getTotalFrames().toString()),
-        ElevatedButton(
-          onPressed: () {
-            randomizeTree();
-          },
-          child: const Text("Randomize"),
-        ),
         Text("Time: " +
             (key.currentState!.animation.getTotalFrames() * 0.5).toString() +
             " s"),
@@ -143,7 +154,7 @@ class _TreeWidgetState extends State<TreeWidget> {
     );
   }
 
-  Widget FrameSelector() {
+  Widget frameSelector() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.max,
@@ -174,7 +185,7 @@ class _TreeWidgetState extends State<TreeWidget> {
     );
   }
 
-  Widget FrameTools() {
+  Widget frameTools() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.max,
@@ -256,6 +267,115 @@ class _TreeWidgetState extends State<TreeWidget> {
     );
   }
 
+  Widget paintTools() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            colorPickerDialog(context, (selectedColor) {
+              for (int i = 0;
+                  i <
+                      key.currentState!.animation
+                          .getFrame(key.currentState!.currentFrame)
+                          .getColors()
+                          .length;
+                  i++) {
+                key.currentState!.animation
+                    .getFrame(key.currentState!.currentFrame)
+                    .setColorInt(i, colorToInt(selectedColor));
+              }
+              setState(() {});
+              Navigator.of(context).pop();
+            }, Colors.black);
+          },
+          child: const Icon(Icons.format_paint),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            randomizeTree();
+          },
+          child: const Text("Randomize"),
+        ),
+      ],
+    );
+  }
+
+  Widget fileTools() {
+    List<Widget> children = [];
+
+    Widget uploadButton = ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Colors.indigo,
+      ),
+      onPressed: !key.currentState!.esp32Api.isReady ? null : () {
+        setState(() {
+          uploadDataToEsp();
+        });
+      },
+      child: const Icon(Icons.upload),
+    );
+
+    Widget saveButton = ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Colors.indigo,
+      ),
+      onPressed: onFileSavePressed,
+      child: const Icon(Icons.save),
+    );
+
+    Widget shareButton = ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Colors.indigo,
+      ),
+      onPressed: onSharePressed,
+      child: const Icon(Icons.share),
+    );
+
+    children.add(uploadButton);
+    children.add(saveButton);
+    //children.add(shareButton);
+    if (key.currentState!.loadedFileName != "") {
+      children.add(
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.indigo,
+          ),
+          onPressed: onFileClosePressed,
+          child: const Icon(Icons.close),
+        ),
+      );
+
+      children.add(
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.indigo,
+          ),
+          onPressed: onFileDeletePressed,
+          child: const Icon(Icons.delete),
+        ),
+      );
+    }else{
+      // TODO: Needs ESP32 code to work!
+      children.add(
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.indigo,
+          ),
+          onPressed: null,
+          child: const Icon(Icons.download),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisSize: MainAxisSize.max,
+      children: children,
+    );
+  }
+
   void setActiveFrame(int idx) {
     setState(() {
       key.currentState!.currentFrame = idx;
@@ -278,58 +398,13 @@ class _TreeWidgetState extends State<TreeWidget> {
   }
 
   void uploadDataToEsp() async {
-    var ipAddress = key.currentState!.espIp;
-    if (ipAddress == "") {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        duration: Duration(seconds: 1),
-        content: Text("Please check IP of the ESP"),
-      ));
-      return;
-    }
+    Utils.showLoadingDialog(context, "Uploading...");
 
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return const AlertDialog(
-          title: Text('Please wait..'),
-          content: Text("We're uploading the animation to your ESP...."),
-        );
-      },
-    );
-
-    http.Response response;
-    try {
-      response = await http
-          .post(
-        Uri.parse("http://" + ipAddress + "/post"),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: key.currentState!.animation.toJsonData(),
-      )
-          .timeout(const Duration(seconds: 5), onTimeout: () {
-        return http.Response('Error', 500);
-      });
-    } catch (_) {
+    var uploadResult = await key.currentState!.esp32Api.uploadFrame(key.currentState!.animation.toJsonData());
+    if(!uploadResult) {
       Navigator.of(context).pop();
 
-      showSimpleDialog("An error occurred", "Timout. Check IP!");
-      return;
-    }
-
-    // TODO: Saving to mobile phone storage!
-
-    if (response.statusCode != 200) {
-      showSimpleDialog("An error occurred", "ESP returned an error.");
-      return;
-    }
-
-    Map<String, dynamic> result = jsonDecode(response.body);
-    if (result["result"] != 0) {
-      Navigator.of(context).pop();
-
-      showSimpleDialog("An error occurred", result['msg']);
+      Utils.showErrorDialog(context, "Upload failed", "Failed to upload the animation to your ESP");
       return;
     }
 
@@ -337,30 +412,8 @@ class _TreeWidgetState extends State<TreeWidget> {
       Navigator.of(context).pop();
     });
 
-    showSimpleSnackbar("Upload successful!");
+    Utils.showSimpleSnackbar(context, "Upload successful!");
   }
-
-  void showSimpleSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      duration: const Duration(seconds: 1),
-      content: Text(message),
-    ));
-  }
-
-  void showSimpleDialog(String title, String text, [bool dismissable = true]) {
-    showDialog(
-      context: context,
-      barrierDismissible: dismissable,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(text),
-        );
-      },
-    );
-  }
-
-  late TextEditingController _controller;
 
   void onFileSavePressed() {
     if (key.currentState!.loadedFileName != "") {
@@ -391,11 +444,11 @@ class _TreeWidgetState extends State<TreeWidget> {
             ElevatedButton(
               child: const Text('Save'),
               onPressed: () {
-                if (_controller.text == "") {
+                if (_controller!.text == "") {
                   return;
                 }
                 Navigator.pop(context);
-                saveFile(_controller.text);
+                saveFile(_controller!.text);
               },
             ),
           ],
@@ -428,12 +481,12 @@ class _TreeWidgetState extends State<TreeWidget> {
             ElevatedButton(
               child: const Text('Save'),
               onPressed: () {
-                if (_controller.text == "") {
+                if (_controller!.text == "") {
                   return;
                 }
 
                 Navigator.pop(context);
-                shareFile(_controller.text);
+                shareFile(_controller!.text);
               },
             ),
           ],
@@ -443,19 +496,24 @@ class _TreeWidgetState extends State<TreeWidget> {
   }
 
   void shareFile(String title) async {
-    showSimpleDialog("Sharing", "Sharing Animation...", false);
+    Utils.showLoadingDialog(context, "Sharing...");
 
     var response = await http.post(
-      Uri.parse("http://" + key.currentState!.communityUrl + "/api/creations/share"),
+      Uri.parse(
+          "http://" + key.currentState!.communityApi.getUrl() + "/api/creations/share"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: "{\"title\": \"" + title + "\","+
-          "\"json_data\": " + key.currentState!.animation.toJsonData() + "}",
+      body: "{\"title\": \"" +
+          title +
+          "\"," +
+          "\"json_data\": " +
+          key.currentState!.animation.toJsonData() +
+          "}",
     );
 
     if (response.statusCode != 200) {
-      showSimpleSnackbar("Request failed.");
+      Utils.showErrorDialog(context, "Sharing failed", "Failed to share the animation");
 
       Navigator.of(context).pop();
       return;
@@ -463,21 +521,20 @@ class _TreeWidgetState extends State<TreeWidget> {
 
     Map<String, dynamic> result = jsonDecode(response.body);
     if (result["result"] != 0) {
-      showSimpleSnackbar(result['msg']);
+      Utils.showErrorDialog(context, "Sharing failed", result['msg']);
 
       Navigator.of(context).pop();
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      duration: Duration(seconds: 1),
-      content: Text("Upload succeeded!"),
-    ));
+    Utils.showSimpleSnackbar(context, "Sharing successful!");
+
     Navigator.of(context).pop();
   }
 
   void saveFile(String fileName) async {
-    showSimpleDialog("Saving", "Saving Animation to file...", false);
+    Utils.showLoadingDialog(context, "Saving Animation...");
+
     var result = await saveDataToFile(
         fileName, key.currentState!.animation.toJsonData(), true);
     Navigator.pop(context);
@@ -488,7 +545,11 @@ class _TreeWidgetState extends State<TreeWidget> {
       });
     }
 
-    showSimpleSnackbar(result ? "File saved!" : "File save error.");
+    if (!result) {
+      Utils.showErrorSnackBar(context, "File save error.");
+    }else{
+      Utils.showSimpleSnackbar(context, "File saved!");
+    }
   }
 
   void onFileClosePressed() {
@@ -500,121 +561,22 @@ class _TreeWidgetState extends State<TreeWidget> {
   }
 
   void onFileDeletePressed() async {
-    showSimpleDialog("Deleting..", "Deleting animation file..", false);
+    if (key.currentState!.loadedFileName == "") {
+      return;
+    }
+
+    Utils.showLoadingDialog(context, "Deleting Animation...");
 
     var result = await deleteFile(key.currentState!.loadedFileName);
     Navigator.of(context).pop();
     if (result) {
       onFileClosePressed();
     }
-    showSimpleSnackbar(result ? "File deleted!" : "Failed to delete file");
-  }
 
-  Widget FileTools() {
-    List<Widget> children = [];
-
-    Widget uploadButton = ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.indigo),
-      ),
-      onPressed: () {
-        setState(() {
-          uploadDataToEsp();
-        });
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: const [Icon(Icons.upload), Text("Upload")],
-      ),
-    );
-
-    Widget saveButton = ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.indigo),
-      ),
-      onPressed: onFileSavePressed,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: const [Icon(Icons.save), Text("Save")],
-      ),
-    );
-
-    Widget shareButton = ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.indigo),
-      ),
-      onPressed: onSharePressed,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: const [Icon(Icons.share), Text("Share")],
-      ),
-    );
-
-    children.add(
-      key.currentState!.loadedFileName != ""
-          ? Column(
-              children: [
-                uploadButton,
-                ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.indigo),
-                  ),
-                  onPressed: onFileDeletePressed,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: const [Icon(Icons.delete), Text("Delete")],
-                  ),
-                ),
-              ],
-            )
-          : uploadButton,
-    );
-
-    children.add(
-      key.currentState!.loadedFileName != ""
-          ? Column(children: [
-              saveButton,
-              ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.indigo),
-                ),
-                onPressed: onFileClosePressed,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: const [Icon(Icons.close), Text("Close")],
-                ),
-              ),
-            ])
-          : saveButton,
-    );
-
-    children.add(
-      key.currentState!.loadedFileName != ""
-          ? Column(children: [
-              shareButton,
-              ElevatedButton(
-                onPressed: null,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: const [Text("")],
-                ),
-              ),
-            ])
-          : shareButton,
-    );
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      mainAxisSize: MainAxisSize.max,
-      children: children,
-    );
+    if (!result) {
+      Utils.showErrorSnackBar(context, "File delete error.");
+    }else{
+      Utils.showSimpleSnackbar(context, "File deleted!");
+    }
   }
 }

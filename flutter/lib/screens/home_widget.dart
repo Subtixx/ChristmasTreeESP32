@@ -4,7 +4,11 @@ import 'package:esp_christmas_tree/screens/community_widget.dart';
 import 'package:esp_christmas_tree/screens/placeholder_widget.dart';
 import 'package:esp_christmas_tree/screens/settings_widget.dart';
 import 'package:esp_christmas_tree/screens/tree_widget.dart';
+import 'package:esp_christmas_tree/utils/community_api.dart';
+import 'package:esp_christmas_tree/utils/esp32_api.dart';
+import 'package:esp_christmas_tree/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -21,10 +25,33 @@ class HomeState extends State {
 
   String activeAnimation = "[]";
 
-  String espIp = "127.0.0.1";
-  String communityUrl = "192.168.1.214";
-
   String loadedFileName = "";
+
+  Esp32Api esp32Api = Esp32Api("");
+  CommunityApi communityApi = CommunityApi("");
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadOption();
+  }
+
+  Future<void> loadOption() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      esp32Api.setIp(prefs.getString('ipAddress') ?? "");
+      communityApi.setUrl(prefs.getString('communityUrl') ?? "");
+    });
+
+    var connectionSuccessful = await esp32Api.testConnection();
+    if (!connectionSuccessful) {
+      Utils.showErrorSnackBar(
+          context, "Connection failed: Please check your connection settings");
+    }
+
+    // TODO: Here is a bug. The upload button sometimes is still disabled.
+  }
 
   void setAnimation(String anim) {
     setState(() {
@@ -48,7 +75,7 @@ class HomeState extends State {
   final List _children = [
     const TreeWidget(),
     const AnimationListWidget(),
-    const CommunityWidget(),
+    //const CommunityWidget(),
     const SettingsWidget(),
   ];
 
@@ -56,30 +83,33 @@ class HomeState extends State {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("ChristmasPCB"),
+        title: const Text("ChristmasPCB"),
       ),
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.primaries[5],
         onTap: onTabTapped,
         currentIndex: _currentIndex,
         items: [
           BottomNavigationBarItem(
-              icon: const Icon(Icons.home),
-              label: 'Home',
-              backgroundColor: Colors.primaries[5]),
+            icon: const Icon(Icons.home),
+            label: 'Home',
+            backgroundColor: Colors.primaries[5],
+          ),
           BottomNavigationBarItem(
-              icon: const Icon(Icons.animation),
-              label: 'My Files',
-              backgroundColor: Colors.primaries[5]),
-          BottomNavigationBarItem(
+            icon: const Icon(Icons.animation),
+            label: 'My Files',
+            backgroundColor: Colors.primaries[5],
+          ),
+          /*BottomNavigationBarItem(
               icon: const Icon(Icons.perm_media),
               label: 'Community',
-              backgroundColor: Colors.primaries[5]),
+              backgroundColor: Colors.primaries[5],
+            ),*/
           BottomNavigationBarItem(
-              icon: const Icon(Icons.settings),
-              label: 'Settings',
-              backgroundColor: Colors.primaries[5]),
+            icon: const Icon(Icons.settings),
+            label: 'Settings',
+            backgroundColor: Colors.primaries[5],
+          ),
         ],
       ),
     );
