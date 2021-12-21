@@ -5,7 +5,7 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 
-//#define DEBUG 1
+#define DEBUG 1
 
 AsyncWebServer server(80);
 
@@ -16,6 +16,9 @@ byte rowSetup[][3] = {
 
 ushort frameCount = 0;
 unsigned char **frames;
+
+// Boolean to specify if the animation has changed
+bool hasChanged = false;
 
 short blue[] = {
   33, // TOP
@@ -155,7 +158,6 @@ void setup()
 
     for (size_t i = 0; i < jsonFrames.size(); i++)
     {
-      // For now we just evaluate band with index 0
       JsonArray bands = jsonFrames[i];
       if (bands.size() < 6)
       {
@@ -194,6 +196,8 @@ void setup()
       // MIDDLE BOTTOM
       frames[i][5] = bands[5].as<unsigned char>();
     }
+    
+    hasChanged = true;
 
     request->send(200, "application/json", "{\"result\": 0}");
   });
@@ -210,6 +214,11 @@ void loop()
 
   for (size_t i = 0; i < frameCount; i++)
   {
+    if(hasChanged)
+    {
+      hasChanged = false;
+      break;
+    }
 #ifdef DEBUG
     Serial.print("Frame ");
     Serial.print(i);
@@ -236,6 +245,14 @@ void loop()
 
   if (frameCount == 1)
   {
-    delay(5000);
+    for(int i = 0; i < 10; i++)
+    {      
+      if(hasChanged)
+      {
+        hasChanged = false;
+        break;
+      }
+      delay(500);
+    }
   }
 }
