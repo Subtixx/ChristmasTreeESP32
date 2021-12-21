@@ -363,7 +363,7 @@ class _TreeWidgetState extends State<TreeWidget> {
           style: ElevatedButton.styleFrom(
             primary: Colors.indigo,
           ),
-          onPressed: null,
+          onPressed: onRetrieveDataPressed,
           child: const Icon(Icons.download),
         ),
       );
@@ -577,6 +577,32 @@ class _TreeWidgetState extends State<TreeWidget> {
       Utils.showErrorSnackBar(context, "File delete error.");
     }else{
       Utils.showSimpleSnackbar(context, "File deleted!");
+    }
+  }
+
+  void onRetrieveDataPressed() async {
+    if (key.currentState!.loadedFileName.isNotEmpty) {
+      return;
+    }
+
+    Utils.showLoadingDialog(context, "Retrieving Animation...");
+
+    var result =
+        await key.currentState!.esp32Api.retrieveAnimation();
+    Navigator.of(context).pop();
+
+    if (result == null) {
+      Utils.showErrorSnackBar(context, "File retrieve error.");
+    } else {
+
+      setState(() {
+        key.currentState!.animation = TreeAnimation();
+        key.currentState!.animation.fromJsonData(result);
+
+        print(key.currentState!.animation.getFrame(0).toJsonData());
+
+        key.currentState!.currentFrame = 0;
+      });
     }
   }
 }

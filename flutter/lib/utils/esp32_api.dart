@@ -94,4 +94,25 @@ class Esp32Api {
 
     return true;
   }
+
+  Future<String?> retrieveAnimation() async {
+    http.Response response;
+    try {
+      response = await http
+          .get(Uri.http(_esp32Ip, "/get"))
+          .timeout(const Duration(seconds: 5), onTimeout: () {
+        throw TimeoutException(
+            'The connection has timed out, Please try again!');
+      });
+    } catch (_) {
+      isReady = false;
+      return null;
+    }
+
+    if (response.statusCode != 200) {
+      return null;
+    }
+
+    return response.body;
+  }
 }
