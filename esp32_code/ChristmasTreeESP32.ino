@@ -4,8 +4,11 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
+#include <StreamUtils.h>
 
 //#define DEBUG 1
+
+unsigned short eepRomSize = 512;
 
 AsyncWebServer server(80);
 
@@ -85,13 +88,14 @@ void ConnectToWiFi()
 
 #pragma region Not Found Page
 void notFound(AsyncWebServerRequest *request) {
-    request->send(404, "text/plain", "Not found");
+  request->send(404, "text/plain", "Not found");
 }
 #pragma endregion
 
 void setup()
 {
   Serial.begin(115200);
+  EEPROM.begin(512);
   delay(10);
 
   // This setups all the pins as outputs
@@ -112,14 +116,55 @@ void setup()
     pinMode(blue[i], OUTPUT);
     digitalWrite(blue[i], LOW);
   }
-  
+
   delay(10);
   ConnectToWiFi();
+
+  DynamicJsonDocument doc(4096);
+  EepromStream eepromStream(0, eepRomSize);
+  deserializeJson(doc, eepromStream);
+
+  JsonArray jsonFrames = doc.as<JsonArray>();
+  if (frames != NULL)
+  {
+    for (int i = 0; i < frameCount; ++i)
+    {
+      delete[] frames[i];
+    }
+    delete[] frames;
+  }
+
+  frameCount = jsonFrames.size();
+  frames = new unsigned char *[frameCount];
+  for (int i = 0; i < frameCount; ++i)
+    frames[i] = new unsigned char[6] {0};
+
+  for (size_t i = 0; i < jsonFrames.size(); i++)
+  {
+    JsonArray bands = jsonFrames[i];
+    // TOP
+    frames[i][0] = bands[0].as<unsigned char>();
+
+    // MIDDLE LEFT
+    frames[i][1] = bands[1].as<unsigned char>();
+
+    // MIDDLE RIGHT
+    frames[i][2] = bands[2].as<unsigned char>();
+
+    // BOTTOM LEFT
+    frames[i][3] = bands[3].as<unsigned char>();
+
+    // BOTTOM RIGHT
+    frames[i][4] = bands[4].as<unsigned char>();
+
+    // MIDDLE BOTTOM
+    frames[i][5] = bands[5].as<unsigned char>();
+  }
 
   server.on(
     "/get",
     HTTP_GET,
-  [](AsyncWebServerRequest * request)
+    [](AsyncWebServerRequest * request)
   {
 #ifdef DEBUG
     Serial.println("Got get request!");
@@ -128,18 +173,18 @@ void setup()
     for (int i = 0; i < frameCount; ++i)
     {
       String frame = String(frames[i][0]) + ", " +
-        String(frames[i][1]) + ", " +
-        String(frames[i][2]) + ", " +
-        String(frames[i][3]) + ", " +
-        String(frames[i][4]) + ", " +
-        String(frames[i][5]);
+                     String(frames[i][1]) + ", " +
+                     String(frames[i][2]) + ", " +
+                     String(frames[i][3]) + ", " +
+                     String(frames[i][4]) + ", " +
+                     String(frames[i][5]);
 
       result += "[" + frame + "]";
-      if(i < frameCount-1)
+      if (i < frameCount - 1)
         result += ",";
     }
     result += "]";
-    request->send(200, "application/json", result);    
+    request->send(200, "application/json", result);
   });
 
   server.on(
@@ -167,6 +212,11 @@ void setup()
       request->send(500, "application/json", "{\"result\": 1, \"msg\": \"" + String(err.f_str()) + "\"}");
       return;
     }
+
+    EepromStream eepromStream(0, eepRomSize);
+    serializeJson(doc, eepromStream);
+    eepromStream.flush();
+
     // all frames of animations
     JsonArray jsonFrames = doc.as<JsonArray>();
 
@@ -220,7 +270,7 @@ void setup()
       // MIDDLE BOTTOM
       frames[i][5] = bands[5].as<unsigned char>();
     }
-    
+
     hasChanged = true;
 
     request->send(200, "application/json", "{\"result\": 0}");
@@ -239,7 +289,7 @@ void loop()
 
   for (size_t i = 0; i < frameCount; i++)
   {
-    if(hasChanged)
+    if (hasChanged)
     {
       hasChanged = false;
       break;
@@ -270,9 +320,9 @@ void loop()
 
   if (frameCount == 1)
   {
-    for(int i = 0; i < 10; i++)
-    {      
-      if(hasChanged)
+    for (int i = 0; i < 10; i++)
+    {
+      if (hasChanged)
       {
         hasChanged = false;
         break;
