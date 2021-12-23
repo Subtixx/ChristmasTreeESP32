@@ -30,11 +30,34 @@ class HomeState extends State {
   Esp32Api esp32Api = Esp32Api("");
   CommunityApi communityApi = CommunityApi("");
 
+  TreeWidget? _treeWidget;
+
   @override
   void initState() {
     super.initState();
 
+    _treeWidget = TreeWidget(connectionTest: esp32Api.testConnection(context));
+    _children = [
+      _treeWidget!,
+      const AnimationListWidget(),
+      const CommunityWidget(),
+      const SettingsWidget(),
+    ];
+
     loadOption();
+  }
+
+  void refresh()
+  {
+    setState(() {
+      _treeWidget = TreeWidget(connectionTest: esp32Api.testConnection(context));
+      _children = [
+        _treeWidget!,
+        const AnimationListWidget(),
+        const CommunityWidget(),
+        const SettingsWidget(),
+      ];
+    });
   }
 
   Future<void> loadOption() async {
@@ -44,7 +67,7 @@ class HomeState extends State {
       communityApi.setUrl(prefs.getString('communityUrl') ?? "");
     });
 
-    var connectionSuccessful = await esp32Api.testConnection();
+    var connectionSuccessful = await esp32Api.testConnection(context);
     if (!connectionSuccessful) {
       Utils.showErrorSnackBar(
           context, "Connection failed: Please check your connection settings");
@@ -72,12 +95,7 @@ class HomeState extends State {
   }
 
   int _currentIndex = 0;
-  final List _children = [
-    const TreeWidget(),
-    const AnimationListWidget(),
-    //const CommunityWidget(),
-    const SettingsWidget(),
-  ];
+  late List<Widget> _children;
 
   @override
   Widget build(BuildContext context) {
@@ -100,11 +118,11 @@ class HomeState extends State {
             label: 'My Files',
             backgroundColor: Colors.primaries[5],
           ),
-          /*BottomNavigationBarItem(
-              icon: const Icon(Icons.perm_media),
-              label: 'Community',
-              backgroundColor: Colors.primaries[5],
-            ),*/
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.perm_media),
+            label: 'Community',
+            backgroundColor: Colors.primaries[5],
+          ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.settings),
             label: 'Settings',

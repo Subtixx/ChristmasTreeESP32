@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:esp_christmas_tree/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -39,7 +40,7 @@ class Esp32Api {
   }
 
   /// Tests connection to ESP32
-  Future<bool> testConnection() async {
+  Future<bool> testConnection(BuildContext context) async {
     http.Response response;
     try {
       response = await http
@@ -49,7 +50,8 @@ class Esp32Api {
             'The connection has timed out, Please try again!');
       });
     } catch (e) {
-      debugPrint(e.toString());
+      Utils.showErrorSnackBar(
+          context, "Connection failed: Please check your connection settings");
 
       isReady = false;
       return false;

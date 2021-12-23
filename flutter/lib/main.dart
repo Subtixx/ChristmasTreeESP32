@@ -4,7 +4,7 @@ import 'package:esp_christmas_tree/screens/home_widget.dart';
 
 import 'package:esp_christmas_tree/data/animation.dart';
 
-final key = new GlobalKey<HomeState>();
+final key = GlobalKey<HomeState>();
 
 void main() {
   runApp(const ChristmasPCB());

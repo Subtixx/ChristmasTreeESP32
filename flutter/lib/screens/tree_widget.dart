@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:esp_christmas_tree/data/animation.dart';
 import 'package:esp_christmas_tree/data/saved_files.dart';
+import 'package:esp_christmas_tree/utils/esp32_api.dart';
 import 'package:esp_christmas_tree/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -12,7 +13,11 @@ import '../main_old.dart';
 import '../main.dart';
 
 class TreeWidget extends StatefulWidget {
-  const TreeWidget({Key? key}) : super(key: key);
+  Esp32Api? esp32api;
+
+  Future<bool>? connectionTest;
+
+  TreeWidget({Key? key, this.connectionTest, this.esp32api}) : super(key: key);
 
   @override
   _TreeWidgetState createState() => _TreeWidgetState();
@@ -25,7 +30,7 @@ class _TreeWidgetState extends State<TreeWidget> {
   void dispose() {
     super.dispose();
 
-    if(_controller != null) {
+    if (_controller != null) {
       _controller!.dispose();
     }
   }
@@ -305,16 +310,23 @@ class _TreeWidgetState extends State<TreeWidget> {
   Widget fileTools() {
     List<Widget> children = [];
 
-    Widget uploadButton = ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        primary: Colors.indigo,
-      ),
-      onPressed: !key.currentState!.esp32Api.isReady ? null : () {
-        setState(() {
-          uploadDataToEsp();
-        });
+    Widget uploadButton = FutureBuilder<bool>(
+      future: widget.connectionTest,
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.indigo,
+          ),
+          onPressed: (!snapshot.hasData || !snapshot.data!)
+              ? null
+              : () {
+                  setState(() {
+                    uploadDataToEsp();
+                  });
+                },
+          child: const Icon(Icons.upload),
+        );
       },
-      child: const Icon(Icons.upload),
     );
 
     Widget saveButton = ElevatedButton(
@@ -356,17 +368,21 @@ class _TreeWidgetState extends State<TreeWidget> {
           child: const Icon(Icons.delete),
         ),
       );
-    }else{
-      // TODO: Needs ESP32 code to work!
-      children.add(
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            primary: Colors.indigo,
-          ),
-          onPressed: onRetrieveDataPressed,
-          child: const Icon(Icons.download),
-        ),
-      );
+    } else {
+      children.add(FutureBuilder<bool>(
+        future: widget.connectionTest,
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.indigo,
+            ),
+            onPressed: (!snapshot.hasData || !snapshot.data!)
+                ? null
+                : onRetrieveDataPressed,
+            child: const Icon(Icons.download),
+          );
+        },
+      ));
     }
 
     return Row(
@@ -400,11 +416,13 @@ class _TreeWidgetState extends State<TreeWidget> {
   void uploadDataToEsp() async {
     Utils.showLoadingDialog(context, "Uploading...");
 
-    var uploadResult = await key.currentState!.esp32Api.uploadFrame(key.currentState!.animation.toJsonData());
-    if(!uploadResult) {
+    var uploadResult = await key.currentState!.esp32Api
+        .uploadFrame(key.currentState!.animation.toJsonData());
+    if (!uploadResult) {
       Navigator.of(context).pop();
 
-      Utils.showErrorDialog(context, "Upload failed", "Failed to upload the animation to your ESP");
+      Utils.showErrorDialog(context, "Upload failed",
+          "Failed to upload the animation to your ESP");
       return;
     }
 
@@ -499,8 +517,9 @@ class _TreeWidgetState extends State<TreeWidget> {
     Utils.showLoadingDialog(context, "Sharing...");
 
     var response = await http.post(
-      Uri.parse(
-          "http://" + key.currentState!.communityApi.getUrl() + "/api/creations/share"),
+      Uri.parse("http://" +
+          key.currentState!.communityApi.getUrl() +
+          "/api/creations/share"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -513,7 +532,8 @@ class _TreeWidgetState extends State<TreeWidget> {
     );
 
     if (response.statusCode != 200) {
-      Utils.showErrorDialog(context, "Sharing failed", "Failed to share the animation");
+      Utils.showErrorDialog(
+          context, "Sharing failed", "Failed to share the animation");
 
       Navigator.of(context).pop();
       return;
@@ -547,7 +567,7 @@ class _TreeWidgetState extends State<TreeWidget> {
 
     if (!result) {
       Utils.showErrorSnackBar(context, "File save error.");
-    }else{
+    } else {
       Utils.showSimpleSnackbar(context, "File saved!");
     }
   }
@@ -575,7 +595,7 @@ class _TreeWidgetState extends State<TreeWidget> {
 
     if (!result) {
       Utils.showErrorSnackBar(context, "File delete error.");
-    }else{
+    } else {
       Utils.showSimpleSnackbar(context, "File deleted!");
     }
   }
@@ -587,14 +607,12 @@ class _TreeWidgetState extends State<TreeWidget> {
 
     Utils.showLoadingDialog(context, "Retrieving Animation...");
 
-    var result =
-        await key.currentState!.esp32Api.retrieveAnimation();
+    var result = await key.currentState!.esp32Api.retrieveAnimation();
     Navigator.of(context).pop();
 
     if (result == null) {
       Utils.showErrorSnackBar(context, "File retrieve error.");
     } else {
-
       setState(() {
         key.currentState!.animation = TreeAnimation();
         key.currentState!.animation.fromJsonData(result);

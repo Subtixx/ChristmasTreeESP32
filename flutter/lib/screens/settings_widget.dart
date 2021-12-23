@@ -64,7 +64,7 @@ class _SettingsWidgetState extends State<SettingsWidget> {
     }
 
     var esp32Api = Esp32Api(_esp32Ip);
-    var espApiResult = await esp32Api.testConnection();
+    var espApiResult = await esp32Api.testConnection(context);
     if (!espApiResult) {
       Navigator.of(context).pop();
 
@@ -83,6 +83,8 @@ class _SettingsWidgetState extends State<SettingsWidget> {
     prefs.setString('communityUrl', key.currentState!.communityApi.getUrl());
 
     Utils.showSimpleSnackbar(context, "Settings saved!");
+
+    key.currentState!.refresh();
   }
 
   @override
