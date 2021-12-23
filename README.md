@@ -54,14 +54,19 @@ This is why I created a christmas tree PCB with an ESP32 and RGB LEDs.
 <table>
   <tr>
     <td>
-      <img src="https://user-images.githubusercontent.com/20743379/144643475-46dab2a0-32f6-418d-850d-f22997feaaa3.png" style="float:left;" />
+      <img src="https://user-images.githubusercontent.com/20743379/147234915-8612cca9-ca1c-4a5f-a9b0-aa396973b72c.png" width="256" />
       <br />
       Bottom View
     </td>
     <td>
-      <img src="https://user-images.githubusercontent.com/20743379/144644482-c9d8dd02-7b3c-48c4-b41e-87ac5af607c9.png" style="float:right;"/>
+      <img src="https://user-images.githubusercontent.com/20743379/147234861-5d1d6595-4663-4edd-9ff1-2820745a7108.png" width="256" />
       <br />
       Top View
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/20743379/147234603-8eb69877-f5bf-40c1-b8d4-10e1267f85d4.png" width="256" />
+      <br />
+      Layout View
     </td>
   </tr>
 </table>
@@ -111,16 +116,28 @@ _(Only frontend part is done)_
 
 **NOTE:** As I am no electronic engineer the PCB does look ugly and can contain some non-standard things. Also after placing the order with JLCPCB, I have discovered that the silkscreen of the RGB LEDs are cut off, woops my mistake. Also I could not figure out how to get rid of the ESP32 Silkscreen.
 
+All issues should be fixed with this new version.
+
+<del>
 - No idea why but I thought the PCB would be much much bigger than it is. It's smaller than the commercial one I got for christmas last year from ebay which was a huge disappointment to me.
+
 - I have not checked for the pinout of the ESP32... So I assume there are some reserved GPIO pins connected :/.
+
 - Pin 35 is connected.. However Pin 35 cannot be an output.
+
 - Some resistors are in series and not connected to the LED. Identified ones are:
   - Pin 17
 - The used part for the ESP32 has the wrong footprint (atleast the one I bought AZDelivery ESP32).. It works when bending while soldering but it should be fixed.
+
 - It is missing an LED on the top of the tree. It looks odd when having the tree turned on without one.
+
 - I have not used any ground plane. No idea if this is critical or if this makes me stupid. But I've connected the grounds for all LEDs using traces. Thinking about this one after the fact makes me feel dumb.
+
 - The slot on the trunk is too tight, PCBs are too thick to fit in there.
+
 - Not an issue but a note on my design, I didn't want to "harm" the look and feel of the tree. This is why I have only populated the front side with components.
+
+</del>
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
