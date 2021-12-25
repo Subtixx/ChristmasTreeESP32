@@ -177,7 +177,7 @@ class _FilesScreenState extends State<FilesScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) {
-              return CreateScreen(data);
+              return CreateScreen(animationFile.title, data);
             },
           ),
         );

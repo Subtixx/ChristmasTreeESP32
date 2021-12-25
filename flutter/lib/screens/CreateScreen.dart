@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class CreateScreen extends StatefulWidget {
+  String fileName;
   String animationData;
 
-  CreateScreen([this.animationData = ""]);
+  CreateScreen([this.fileName = "", this.animationData = ""]);
 
   @override
   _CreateScreenState createState() => _CreateScreenState();
@@ -19,7 +20,7 @@ class _CreateScreenState extends State<CreateScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive,
         overlays: [SystemUiOverlay.top]);
 
-    if (widget.animationData.isEmpty) {
+    if (widget.animationData.isEmpty || widget.fileName.isEmpty) {
       return;
     }
 
@@ -59,9 +60,9 @@ class _CreateScreenState extends State<CreateScreen> {
                   icon: const Icon(Icons.upload),
                   onPressed: () {},
                 ),
-                const IconButton(
-                  icon: Icon(Icons.download),
-                  onPressed: null,
+                IconButton(
+                  icon: const Icon(Icons.download),
+                  onPressed: widget.animationData.isNotEmpty ? null : (){},
                 ),
                 const IconButton(
                   icon: Icon(Icons.close),
@@ -82,13 +83,13 @@ class _CreateScreenState extends State<CreateScreen> {
               Container(
                 margin: const EdgeInsets.all(10),
               ),
-              Container(
+              widget.fileName.isEmpty ? Container() : Container(
                 margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
-                  children: const [
-                    Text("my_awesome_animation"),
+                  children: [
+                    Text(widget.fileName),
                   ],
                 ),
               ),
